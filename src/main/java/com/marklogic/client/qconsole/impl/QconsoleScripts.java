@@ -4,9 +4,9 @@ package com.marklogic.client.qconsole.impl;
  * This scripts are defined as strings so that it's easy to reuse this in an environment like Gradle without
  * having to read files from the classpath.
  */
-public class QconsoleScripts {
+class QconsoleScripts {
 
-	public static final String IMPORT = "xquery version \"1.0-ml\";\n" +
+	static final String IMPORT = "xquery version \"1.0-ml\";\n" +
 		"\n" +
 		"declare namespace qconsole=\"http://marklogic.com/appservices/qconsole\";\n" +
 		"\n" +
@@ -106,7 +106,7 @@ public class QconsoleScripts {
 		"\n" +
 		"local:import-workspace($exported-workspace/element(), $user)";
 
-	public final static String EXPORT = "xquery version \"1.0-ml\";\n" +
+	final static String EXPORT = "xquery version \"1.0-ml\";\n" +
 		"\n" +
 		"declare namespace qconsole=\"http://marklogic.com/appservices/qconsole\";\n" +
 		"\n" +
@@ -143,22 +143,35 @@ public class QconsoleScripts {
 		"\n" +
 		"let $ws-uri := local:get-ws-uri($user, $workspace)\n" +
 		"let $ws := local:get-workspace($ws-uri)\n" +
-		"let $queries := \n" +
-		"    for $q in $ws/qconsole:workspace/qconsole:queries/qconsole:query\n" +
-		"    return \n" +
-		"      <query name=\"{string($q/qconsole:name)}\" focus=\"{string($q/qconsole:focus)}\" active=\"{string($q/qconsole:active)}\" mode=\"{string($q/qconsole:mode)}\">\n" +
-		"        {local:do-eval(concat(\"fn:doc('/queries/\", xs:unsignedLong($q/qconsole:id), \".txt')\"), ())}\n" +
-		"      </query>\n" +
-		"\n" +
-		"let $export := \n" +
-		"    if ($queries) then (\n" +
-		"    <export>\n" +
-		"      <workspace name=\"{string($ws/qconsole:workspace/qconsole:name)}\">\n" +
-		"        {$queries}\n" +
-		"      </workspace>\n" +
-		"    </export> )\n" +
-		"    else (text{\"No workspace found with the name of \", $workspace, \".\"})\n" +
-		"\n" +
-		"return $export";
+		"let $exported-ws := " +
+		"	if (fn:starts-with($version, \"9\" )) then " +
+		"		<export>{\n" +
+		"            <workspace name=\"{string($ws/qconsole:name)}\">\n" +
+		"               {let $queries := $ws/qconsole:queries/qconsole:query\n" +
+		"                for $q in $queries\n" +
+		"                return\n" +
+		"                <query name=\"{string($q/qconsole:name)}\" focus=\"{string($q/qconsole:focus)}\" active=\"{string($q/qconsole:active)}\" content-source=\"{string($q/qconsole:content-source)}\" mode=\"{string($q/qconsole:mode)}\">{ amped-qconsole:qconsole-doc(concat(\"/queries/\", xs:unsignedLong($q/qconsole:id) ,\".txt\")) }</query>}\n" +
+		"            </workspace>\n" +
+		"        }</export>\n" +
+		"	\n" +
+		"	else " +
+		"		let $queries := \n" +
+		" 	   	for $q in $ws/qconsole:workspace/qconsole:queries/qconsole:query\n" +
+		" 	   	return \n" +
+		" 	     	<query name=\"{string($q/qconsole:name)}\" focus=\"{string($q/qconsole:focus)}\" active=\"{string($q/qconsole:active)}\" mode=\"{string($q/qconsole:mode)}\">\n" +
+		"		        {local:do-eval(concat(\"fn:doc('/queries/\", xs:unsignedLong($q/qconsole:id), \".txt')\"), ())}\n" +
+		"		      </query>\n" +
+		"		\n" +
+		"		let $export := \n" +
+		"		    if ($queries) then (\n" +
+		"			    <export>\n" +
+		"		 	     <workspace name=\"{string($ws/qconsole:workspace/qconsole:name)}\">\n" +
+		"		 	       {$queries}\n" +
+		"		 	 	 </workspace>\n" +
+		" 		   </export> )\n" +
+		"	 	   else (text{\"No workspace found with the name of \", $workspace, \".\"})\n" +
+		"		\n" +
+		"	return $export" +
+		"return $exported-ws";
 
 }
