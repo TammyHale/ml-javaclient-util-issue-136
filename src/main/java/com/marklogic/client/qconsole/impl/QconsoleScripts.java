@@ -4,9 +4,9 @@ package com.marklogic.client.qconsole.impl;
  * This scripts are defined as strings so that it's easy to reuse this in an environment like Gradle without
  * having to read files from the classpath.
  */
-class QconsoleScripts {
+public class QconsoleScripts {
 
-	static final String IMPORT = "xquery version \"1.0-ml\";\n" +
+	public static final String IMPORT = "xquery version \"1.0-ml\";\n" +
 		"\n" +
 		"declare namespace qconsole=\"http://marklogic.com/appservices/qconsole\";\n" +
 		"\n" +
@@ -106,9 +106,11 @@ class QconsoleScripts {
 		"\n" +
 		"local:import-workspace($exported-workspace/element(), $user)";
 
-	final static String EXPORT = "xquery version \"1.0-ml\";\n" +
+	public final static String EXPORT = "xquery version \"1.0-ml\";\n" +
 		"\n" +
 		"declare namespace qconsole=\"http://marklogic.com/appservices/qconsole\";\n" +
+		"\n" +
+		"import module namespace amped-qconsole = \\\"http://marklogic.com/appservices/qconsole/util-amped\\\" at \\\"/MarkLogic/appservices/qconsole/qconsole-amped.xqy\\\";\\n\" +\n" +
 		"\n" +
 		"declare variable $user as xs:string external;\n" +
 		"declare variable $workspace as xs:string external;\n" +
@@ -118,6 +120,7 @@ class QconsoleScripts {
 		"      <options xmlns=\"xdmp:eval\">\n" +
 		"      <database>{xdmp:database(\"App-Services\")}</database>\n" +
 		"      </options>)\n" +
+		"};\n" +
 		"};\n" +
 		"\n" +
 		"declare function local:get-ws-uri($user as xs:string, $workspace as xs:string) {\n" +
